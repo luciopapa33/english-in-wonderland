@@ -1,0 +1,119 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  role          Role      @default(STUDENT)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  profile       Profile?
+  enrollments   Enrollment[]
+  subscriptions Subscription[]
+  completions   LessonCompletion[]
+}
+
+model Profile {
+  id        String  @id @default(cuid())
+  userId    String  @unique
+  user      User    @relation(fields: [userId], references: [id])
+  avatarUrl String?
+  phone     String?
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String?  @unique
+  description String
+  price       Float
+  level       String
+  type        String   @default("COURSE") // COURSE or DIGITAL_PRODUCT
+  imageUrl    String?
+  totalItems  Int      @default(0) // Total videos/lessons for progress calculation
+  units       Unit[]
+  enrollments Enrollment[]
+  completions LessonCompletion[]
+}
+
+model Unit {
+  id        String   @id @default(cuid())
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  title     String
+  order     Int
+  lessons   Lesson[]
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  unitId      String
+  unit        Unit     @relation(fields: [unitId], references: [id])
+  title       String
+  description String?
+  videoUrl    String?
+  duration    String?
+  order       Int
+  isFree      Boolean  @default(false)
+  resources   Resource[]
+}
+
+model Resource {
+  id       String @id @default(cuid())
+  lessonId String
+  lesson   Lesson @relation(fields: [lessonId], references: [id])
+  title    String
+  url      String
+  type     String // PDF, LINK, etc.
+}
+
+model Enrollment {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  user      User     @relation(fields: [userId], references: [id])
+  course    Course   @relation(fields: [courseId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, courseId])
+}
+
+model LessonCompletion {
+  id          String   @id @default(cuid())
+  userId      String
+  courseId     String
+  lessonKey   String   // lessonId for courses, video number ("1", "2"...) for digital products
+  user        User     @relation(fields: [userId], references: [id])
+  course      Course   @relation(fields: [courseId], references: [id])
+  completedAt DateTime @default(now())
+
+  @@unique([userId, courseId, lessonKey])
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  status    String   // ACTIVE, CANCELLED, EXPIRED
+  plan      String   // FENIX_METHOD
+  startDate DateTime @default(now())
+  endDate   DateTime?
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+  TRANSLATOR
+}
