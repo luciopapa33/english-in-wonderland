@@ -3,6 +3,13 @@ import { Button } from '@/components/ui/button';
 import { ShoppingCart, Star, PlayCircle, FileText, ArrowRight, Sparkles, Gift, CheckCircle2, Briefcase, Plane, HeartPulse } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import prisma from '@/lib/prisma';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: "Tienda | English in Wonderland",
+    description: "Cursos de inglés para propósitos específicos: Entrevistas laborales, Viajes y Emergencias Médicas. ¡Dominá el idioma y transformá tu carrera!",
+};
+
 
 const PRODUCT_ICONS: Record<string, typeof Briefcase> = {
     'english-for-interviews': Briefcase,

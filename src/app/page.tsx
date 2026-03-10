@@ -1,6 +1,13 @@
 import Link from 'next/link';
 import { ArrowRight, BookOpen, Globe, Sparkles, Star, Zap, Clock, Lightbulb, Monitor, Users, Heart, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: "English in Wonderland | Academia de Inglés & Traducciones",
+  description: "Aprende inglés de forma dinámica en English in Wonderland. Cursos especializados, academia online y servicios de traducción certificada.",
+};
+
 
 export default function Home() {
   return (

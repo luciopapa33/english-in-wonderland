@@ -1,6 +1,12 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Calendar, User, ArrowRight } from 'lucide-react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: "Blog | English in Wonderland",
+    description: "Tips, guías y recursos gratuitos para mejorar tu inglés. Todo lo que necesitás saber sobre gramática, vocabulario y cultura bilingüe.",
+};
 
 const posts = [
     {

@@ -3,6 +3,13 @@ import Image from 'next/image';
 import { Briefcase, FileText, CheckCircle2, ShieldCheck, Languages, Zap, ArrowRight, MessageSquare, Award, Globe, GraduationCap, Stethoscope, Scale, BookOpen, Stamp, Subtitles, Mic, LayoutTemplate, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: "Traducciones | English in Wonderland",
+    description: "Servicios de traducción pública y certificada (Español-Inglés). Legal, medicina, educación e inmigración. Traducciones con validez oficial.",
+};
+
 
 export default function TranslationsPage() {
     return (

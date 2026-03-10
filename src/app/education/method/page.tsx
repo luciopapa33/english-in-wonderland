@@ -2,6 +2,13 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, CheckCircle2, Rocket, Brain, Sparkles, Target, Zap, Flame, Mic, Headphones, ShieldCheck, ArrowRight, MessageSquare, Users, TrendingUp, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: "Método Fénix | English in Wonderland",
+    description: "Descubrí el Método Fénix de English in Wonderland. Un sistema de aprendizaje acelerado diseñado para que hables inglés con confianza en tiempo récord.",
+};
+
 
 export default function MethodPage() {
     return (
