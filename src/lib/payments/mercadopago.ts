@@ -4,11 +4,11 @@ import { MercadoPagoConfig, Preference } from 'mercadopago';
 import { createClient } from '@/lib/supabase/server';
 import prisma from '@/lib/prisma';
 
-const client = new MercadoPagoConfig({
-    accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN || ''
-});
-
 export async function createCoursePreference(courseId: string) {
+    const client = new MercadoPagoConfig({
+        accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN || ''
+    });
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -38,6 +38,8 @@ export async function createCoursePreference(courseId: string) {
 
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
         const isProduction = !appUrl.includes('localhost') && !appUrl.includes('127.0.0.1');
+        const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN || '';
+        const isTestToken = accessToken.startsWith('TEST-');
 
         const result = await preference.create({
             body: {
@@ -50,7 +52,7 @@ export async function createCoursePreference(courseId: string) {
                         currency_id: 'ARS',
                     }
                 ],
-                // Only include back_urls and auto_return in production (MP rejects localhost URLs)
+                // Only include back_urls and auto_return when URL is not localhost (MP rejects localhost URLs)
                 ...(isProduction ? {
                     back_urls: {
                         success: `${appUrl}/campus/dashboard/courses`,
@@ -68,7 +70,12 @@ export async function createCoursePreference(courseId: string) {
             }
         });
 
-        return result.id;
+        // Use sandbox_init_point for test tokens, init_point for production
+        const redirectUrl = isTestToken
+            ? result.sandbox_init_point
+            : result.init_point;
+
+        return { preferenceId: result.id, redirectUrl };
     } catch (error: unknown) {
         const errObj = error as Record<string, unknown>;
         console.error('=== MERCADO PAGO ERROR ===');

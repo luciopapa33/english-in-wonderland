@@ -2,11 +2,11 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { MercadoPagoConfig, Payment } from 'mercadopago';
 
-const client = new MercadoPagoConfig({
-    accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN || ''
-});
-
 export async function POST(request: Request) {
+    const client = new MercadoPagoConfig({
+        accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN || ''
+    });
+
     const body = await request.json();
     const { data, type } = body;
 
@@ -41,3 +41,4 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ status: 'ok' });
 }
+

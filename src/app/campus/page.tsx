@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { Lock, Mail, ArrowRight, GraduationCap, User, UserPlus } from "lucide-react";
+import { Lock, Mail, ArrowRight, GraduationCap, User, UserPlus, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { login, signup } from "./actions";
 import { useState } from "react";
@@ -11,6 +11,8 @@ import { Suspense } from "react";
 
 function CampusForm() {
     const [mode, setMode] = useState<"login" | "register">("login");
+    const [showLoginPassword, setShowLoginPassword] = useState(false);
+    const [showRegisterPassword, setShowRegisterPassword] = useState(false);
     const searchParams = useSearchParams();
     const error = searchParams.get("error");
 
@@ -119,11 +121,19 @@ function CampusForm() {
                                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                         <input
                                             name="password"
-                                            type="password"
+                                            type={showLoginPassword ? "text" : "password"}
                                             required
                                             placeholder="••••••••"
-                                            className="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-[var(--edu-primary)] focus:bg-white transition-all"
+                                            className="w-full pl-12 pr-12 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-[var(--edu-primary)] focus:bg-white transition-all"
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowLoginPassword(!showLoginPassword)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                                            tabIndex={-1}
+                                        >
+                                            {showLoginPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
                                     </div>
                                 </div>
 
@@ -132,7 +142,7 @@ function CampusForm() {
                                         <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-[var(--edu-primary)] focus:ring-[var(--edu-primary)]" />
                                         <span className="text-slate-600 group-hover:text-slate-900 transition-colors">Recordarme</span>
                                     </label>
-                                    <a href="#" className="text-[var(--edu-primary)] font-bold hover:underline">¿Olvidaste tu contraseña?</a>
+                                    <a href="/campus/forgot-password" className="text-[var(--edu-primary)] font-bold hover:underline">¿Olvidaste tu contraseña?</a>
                                 </div>
 
                                 <Button type="submit" className="w-full py-8 text-lg rounded-2xl shadow-xl shadow-[var(--edu-primary)]/20">
@@ -185,12 +195,20 @@ function CampusForm() {
                                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                         <input
                                             name="password"
-                                            type="password"
+                                            type={showRegisterPassword ? "text" : "password"}
                                             required
                                             minLength={6}
                                             placeholder="Mínimo 6 caracteres"
-                                            className="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-[var(--edu-primary)] focus:bg-white transition-all"
+                                            className="w-full pl-12 pr-12 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-[var(--edu-primary)] focus:bg-white transition-all"
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                                            tabIndex={-1}
+                                        >
+                                            {showRegisterPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
                                     </div>
                                 </div>
 

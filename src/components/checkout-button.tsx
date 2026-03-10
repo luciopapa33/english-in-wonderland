@@ -17,9 +17,12 @@ export function CheckoutButton({ courseId, price, className }: CheckoutButtonPro
     const handleCheckout = async () => {
         setLoading(true);
         try {
-            const preferenceId = await createCoursePreference(courseId);
-            // Redirect to Mercado Pago
-            window.location.href = `https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=${preferenceId}`;
+            const { redirectUrl } = await createCoursePreference(courseId);
+            if (redirectUrl) {
+                window.location.href = redirectUrl;
+            } else {
+                alert('Error: No se pudo obtener la URL de pago');
+            }
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : String(error);
             console.error('Checkout error:', message, error);

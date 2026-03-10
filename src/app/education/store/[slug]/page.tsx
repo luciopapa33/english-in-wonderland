@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { CheckoutButton } from '@/components/checkout-button';
+import { DevEnrollButton } from '@/components/dev-enroll-button';
 import {
     ArrowLeft,
     PlayCircle,
@@ -365,6 +366,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                             <span>Acceso de por vida</span>
                                         </div>
                                     </div>
+                                    <Link href="/campus/dashboard/courses">
+                                        <Button className="w-full py-7 text-base rounded-2xl shadow-xl shadow-[var(--edu-primary)]/20">
+                                            <PlayCircle size={20} className="mr-2" /> Ir a mi curso
+                                        </Button>
+                                    </Link>
                                 </>
                             ) : (
                                 <>
@@ -400,6 +406,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                     </div>
 
                                     <CheckoutButton courseId={product.id} price={product.price} />
+
+                                    <DevEnrollButton courseId={product.id} />
 
                                     <div className="flex items-center justify-center gap-2 text-xs text-slate-400 font-medium">
                                         <Shield size={14} />
