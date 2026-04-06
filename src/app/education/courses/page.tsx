@@ -115,8 +115,10 @@ export default async function CoursesPage() {
                                 </div>
 
                                 <div className="pt-8 mt-auto">
-                                    <Button variant="outline" className={cn("w-full py-6 rounded-2xl text-sm font-bold group-hover:shadow-xl transition-all border-2", course.borderColor)}>
-                                        VER MÁS <ArrowRight className="ml-2 h-4 w-4" />
+                                    <Button asChild variant="outline" className={cn("w-full py-6 rounded-2xl text-sm font-bold group-hover:shadow-xl transition-all border-2", course.borderColor)}>
+                                        <Link href="/contacto">
+                                            VER MÁS <ArrowRight className="ml-2 h-4 w-4" />
+                                        </Link>
                                     </Button>
                                 </div>
                             </div>

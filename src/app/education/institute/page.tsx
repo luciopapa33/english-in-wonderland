@@ -190,8 +190,10 @@ export default function InstitutePage() {
                         <h2 className="text-3xl md:text-5xl font-black">Instituto Wonderland Capitán Bermúdez</h2>
                         <p className="text-white/90 text-lg">Cursos de inglés para todas las edades. Le invitamos a conocernos y ser parte del compromiso de aprender en forma seria pero entretenida.</p>
                         <div className="flex flex-wrap justify-center gap-4 pt-4">
-                            <Button variant="glass" size="lg" className="rounded-full px-10">
-                                Contactanos <ArrowRight className="ml-2" />
+                            <Button asChild variant="glass" size="lg" className="rounded-full px-10">
+                                <Link href="/contacto">
+                                    Contactanos <ArrowRight className="ml-2" />
+                                </Link>
                             </Button>
                         </div>
                     </div>

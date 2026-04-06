@@ -38,8 +38,10 @@ export default function MethodPage() {
                     Un método comunicativo diseñado para adultos que ya tienen base en inglés, pero no logran hablar con seguridad ni naturalidad.
                 </p>
                 <div className="flex flex-wrap justify-center gap-4 pt-4">
-                    <Button variant="premium" size="lg" className="rounded-full px-10 h-16 text-lg shadow-2xl shadow-[var(--edu-primary)]/20">
-                        👉 Quiero recuperar mi fluidez
+                    <Button asChild variant="premium" size="lg" className="rounded-full px-10 h-16 text-lg shadow-2xl shadow-[var(--edu-primary)]/20">
+                        <Link href="/contacto">
+                            👉 Quiero recuperar mi fluidez
+                        </Link>
                     </Button>
                 </div>
             </section>
@@ -362,8 +364,10 @@ export default function MethodPage() {
                                 <p className="text-lg font-bold text-white">
                                     En pocas semanas vas a hablar con menos bloqueos, dejar de traducir mentalmente, ganar seguridad en reuniones y sentirte cómodo usando el idioma.
                                 </p>
-                                <Button variant="premium" className="w-full py-8 text-lg rounded-2xl">
-                                    👉 Sumate al Método Fénix hoy
+                                <Button asChild variant="premium" className="w-full py-8 text-lg rounded-2xl">
+                                    <Link href="/contacto">
+                                        👉 Sumate al Método Fénix hoy
+                                    </Link>
                                 </Button>
                             </div>
                         </div>
@@ -378,8 +382,10 @@ export default function MethodPage() {
                     <div className="relative z-10 space-y-6">
                         <h2 className="text-3xl md:text-5xl font-black">No necesitás empezar de nuevo.</h2>
                         <p className="text-2xl font-bold text-white/90">Necesitás renacer en tu fluidez.</p>
-                        <Button variant="glass" size="lg" className="rounded-full px-12 h-16 text-lg mt-4">
-                            👉 Sumate al Método Fénix hoy
+                        <Button asChild variant="glass" size="lg" className="rounded-full px-12 h-16 text-lg mt-4">
+                            <Link href="/contacto">
+                                👉 Sumate al Método Fénix hoy
+                            </Link>
                         </Button>
                     </div>
                 </div>

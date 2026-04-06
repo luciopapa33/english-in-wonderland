@@ -4,6 +4,7 @@ import { Briefcase, FileText, CheckCircle2, ShieldCheck, Languages, Zap, ArrowRi
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Metadata } from 'next';
+import ContactForm from '@/components/sections/ContactForm';
 
 export const metadata: Metadata = {
     title: "Traducciones | English in Wonderland",
@@ -23,7 +24,7 @@ export default function TranslationsPage() {
                     className="object-cover opacity-20"
                     sizes="100vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/80 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/80 to-transparent pointer-events-none" />
 
                 <div className="container mx-auto px-4 relative z-10 grid lg:grid-cols-2 gap-12 items-center">
                     <div className="space-y-8">
@@ -41,11 +42,15 @@ export default function TranslationsPage() {
                             Soy traductora pública de inglés y español con más de siete años de experiencia brindando servicios lingüísticos de alta precisión para clientes en Estados Unidos, América Latina y Europa.
                         </p>
                         <div className="flex flex-wrap gap-4">
-                            <Button variant="premium" size="lg" className="rounded-full shadow-teal-500/20">
-                                Solicitar Cotización
+                            <Button asChild variant="premium" size="lg" className="rounded-full shadow-teal-500/20">
+                                <Link href="#contacto">
+                                    Solicitar Cotización
+                                </Link>
                             </Button>
-                            <Button variant="glass" size="lg" className="rounded-full">
-                                Hablar con Mariana
+                            <Button asChild variant="glass" size="lg" className="rounded-full">
+                                <Link href="#contacto">
+                                    Hablar con Mariana
+                                </Link>
                             </Button>
                         </div>
                     </div>
@@ -228,20 +233,9 @@ export default function TranslationsPage() {
                 </div>
             </section>
 
-            {/* CTA Final */}
-            <section className="container mx-auto px-4">
-                <div className="max-w-4xl mx-auto bg-gradient-to-br from-[#2D93C7] to-[#1DA1D2] rounded-[3rem] p-12 md:p-20 text-center text-white relative overflow-hidden">
-                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.05) 10px, rgba(255,255,255,0.05) 20px)" }} />
-                    <div className="relative z-10 space-y-6">
-                        <h2 className="text-3xl md:text-5xl font-black">¿Necesitás una traducción profesional?</h2>
-                        <p className="text-white/90 text-lg">Exactitud técnica, cumplimiento normativo y confidencialidad absoluta.</p>
-                        <div className="flex flex-wrap justify-center gap-4 pt-4">
-                            <Button variant="glass" size="lg" className="rounded-full px-12 h-16 text-lg">
-                                Solicitar Cotización <ArrowRight className="ml-2" />
-                            </Button>
-                        </div>
-                    </div>
-                </div>
+            {/* Contact Section */}
+            <section className="container mx-auto px-4 py-24 mb-20">
+                <ContactForm />
             </section>
         </div>
     );
