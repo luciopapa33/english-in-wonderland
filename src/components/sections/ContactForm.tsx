@@ -4,13 +4,16 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { CheckCircle2, Mail, MapPin, Phone } from 'lucide-react';
+import { CheckCircle2, Mail, MapPin, Phone, Check } from 'lucide-react';
 
 export default function ContactForm() {
     const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+    const [isHuman, setIsHuman] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!isHuman) return;
+        
         setStatus('submitting');
         
         // Simulate submission
@@ -89,10 +92,15 @@ export default function ContactForm() {
                                 className="min-h-[150px] bg-white/5 border-white/10 text-white rounded-[1.5rem] focus:ring-[var(--trans-primary)]"
                             />
 
-                            {/* ReCAPTCHA Visual Placeholder */}
-                            <div className="bg-white rounded-lg p-4 flex items-center justify-between shadow-lg">
+                            {/* ReCAPTCHA Visual & Interactive Placeholder */}
+                            <div 
+                                className="bg-white rounded-lg p-4 flex items-center justify-between shadow-lg cursor-pointer select-none"
+                                onClick={() => setIsHuman(!isHuman)}
+                            >
                                 <div className="flex items-center gap-3">
-                                    <div className="h-6 w-6 border-2 border-slate-300 rounded" />
+                                    <div className={`h-6 w-6 border-2 flex items-center justify-center rounded transition-colors ${isHuman ? 'border-green-500 bg-green-500' : 'border-slate-300'}`}>
+                                        {isHuman && <Check size={16} className="text-white" />}
+                                    </div>
                                     <span className="text-slate-600 font-medium">No soy un robot</span>
                                 </div>
                                 <div className="flex flex-col items-center">
@@ -107,8 +115,8 @@ export default function ContactForm() {
 
                             <Button 
                                 type="submit" 
-                                disabled={status === 'submitting'}
-                                className="w-full h-16 text-lg font-black rounded-2xl bg-gradient-to-r from-[var(--trans-primary)] to-[var(--edu-primary)] hover:scale-[1.02] transition-all shadow-xl shadow-[var(--trans-primary)]/20"
+                                disabled={status === 'submitting' || !isHuman}
+                                className="w-full h-16 text-lg font-black rounded-2xl bg-gradient-to-r from-[var(--trans-primary)] to-[var(--edu-primary)] hover:scale-[1.02] transition-all shadow-xl shadow-[var(--trans-primary)]/20 disabled:opacity-50 disabled:hover:scale-100"
                             >
                                 {status === 'submitting' ? 'Enviando...' : 'Enviar Mensaje'}
                             </Button>
@@ -137,7 +145,7 @@ export default function ContactForm() {
                                     </div>
                                     <div>
                                         <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">Dirección</p>
-                                        <p className="text-white text-lg font-medium">Florida 50 (2154) Capitan Bermude, Santa Fe, Argentina</p>
+                                        <p className="text-white text-lg font-medium">Florida 50 (2154) Capitán Bermúdez, Santa Fe, Argentina</p>
                                     </div>
                                 </div>
 
