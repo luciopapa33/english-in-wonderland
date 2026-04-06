@@ -71,7 +71,7 @@ export default function ContactForm() {
                             <Input 
                                 type="email" 
                                 name="email" 
-                                placeholder="Email" 
+                                placeholder="Correo electrónico" 
                                 required 
                                 className="h-14 bg-white/5 border-white/10 text-white rounded-2xl focus:ring-[var(--trans-primary)]"
                             />
@@ -80,11 +80,6 @@ export default function ContactForm() {
                                 name="telefono" 
                                 placeholder="Número de teléfono" 
                                 required 
-                                className="h-14 bg-white/5 border-white/10 text-white rounded-2xl focus:ring-[var(--trans-primary)]"
-                            />
-                            <Input 
-                                name="direccion" 
-                                placeholder="Dirección" 
                                 className="h-14 bg-white/5 border-white/10 text-white rounded-2xl focus:ring-[var(--trans-primary)]"
                             />
                             <Textarea 
