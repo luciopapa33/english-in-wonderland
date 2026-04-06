@@ -10,16 +10,44 @@ export default function ContactForm() {
     const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
     const [isHuman, setIsHuman] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!isHuman) return;
         
         setStatus('submitting');
         
-        // Simulate submission
-        setTimeout(() => {
-            setStatus('success');
-        }, 1500);
+        const form = e.currentTarget;
+        const formData = new FormData(form);
+        
+        // Configuración para Web3Forms
+        // La clave se leerá desde el archivo .env (.env.local) o desde las variables de Vercel
+        const accessKey = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY || "";
+        formData.append("access_key", accessKey);
+        formData.append("subject", "Nuevo mensaje desde el sitio web - English in Wonderland");
+        formData.append("from_name", "Sitio Web (English in Wonderland)");
+
+        try {
+            const response = await fetch("https://api.web3forms.com/submit", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setStatus('success');
+                form.reset();
+                setIsHuman(false);
+            } else {
+                console.error("Web3Forms API Error:", data);
+                alert("Hubo un error interno al tratar de enviar el mensaje: " + data.message);
+                setStatus('idle');
+            }
+        } catch (error) {
+            console.error("Submission error:", error);
+            alert("Hubo un error de conexión.");
+            setStatus('idle');
+        }
     };
 
     if (status === 'success') {
