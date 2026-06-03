@@ -21,7 +21,7 @@ export default function ContactForm() {
         
         // Configuración para Web3Forms
         // La clave se leerá desde el archivo .env (.env.local) o desde las variables de Vercel
-        const accessKey = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY || "";
+        const accessKey = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY || "edc84cd2-040e-4826-9b70-74098359f729";
         formData.append("access_key", accessKey);
         formData.append("subject", "Nuevo mensaje desde el sitio web - English in Wonderland");
         formData.append("from_name", "Sitio Web (English in Wonderland)");
