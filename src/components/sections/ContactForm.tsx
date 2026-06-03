@@ -17,17 +17,21 @@ export default function ContactForm() {
         setStatus('submitting');
         
         const form = e.currentTarget;
-        const formData = new FormData(form);
-        
-        // Configuración para Web3Forms
-        // La clave se leerá desde el archivo .env (.env.local) o desde las variables de Vercel
         const accessKey = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY || "edc84cd2-040e-4826-9b70-74098359f729";
-        formData.append("access_key", accessKey);
-        formData.append("subject", "Nuevo mensaje desde el sitio web - English in Wonderland");
-        formData.append("from_name", "Sitio Web (English in Wonderland)");
 
-        const object = Object.fromEntries(formData);
-        const json = JSON.stringify(object);
+        // Explicitly create payload to avoid any FormData parsing issues
+        const payload = {
+            access_key: accessKey,
+            subject: "Nuevo mensaje desde el sitio web - English in Wonderland",
+            from_name: "Sitio Web (English in Wonderland)",
+            nombre: form.nombre.value,
+            apellido: form.apellido.value,
+            email: form.email.value,
+            telefono: form.telefono.value,
+            mensaje: form.mensaje.value
+        };
+
+        const json = JSON.stringify(payload);
 
         try {
             const response = await fetch("https://api.web3forms.com/submit", {
