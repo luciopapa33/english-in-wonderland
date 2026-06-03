@@ -17,13 +17,8 @@ export default function ContactForm() {
         setStatus('submitting');
         
         const form = e.currentTarget;
-        const accessKey = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY || "edc84cd2-040e-4826-9b70-74098359f729";
 
-        // Explicitly create payload to avoid any FormData parsing issues
         const payload = {
-            access_key: accessKey,
-            subject: "Nuevo mensaje desde el sitio web - English in Wonderland",
-            from_name: "Sitio Web (English in Wonderland)",
             nombre: form.nombre.value,
             apellido: form.apellido.value,
             email: form.email.value,
@@ -31,16 +26,13 @@ export default function ContactForm() {
             mensaje: form.mensaje.value
         };
 
-        const json = JSON.stringify(payload);
-
         try {
-            const response = await fetch("https://api.web3forms.com/submit", {
+            const response = await fetch("/api/contact", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Accept: "application/json"
                 },
-                body: json
+                body: JSON.stringify(payload),
             });
 
             const data = await response.json();
@@ -50,8 +42,8 @@ export default function ContactForm() {
                 form.reset();
                 setIsHuman(false);
             } else {
-                console.error("Web3Forms API Error:", data);
-                alert("Hubo un error interno al tratar de enviar el mensaje: " + data.message);
+                console.error("Contact API Error:", data);
+                alert("Hubo un error al tratar de enviar el mensaje: " + (data.message || "Error desconocido"));
                 setStatus('idle');
             }
         } catch (error) {
