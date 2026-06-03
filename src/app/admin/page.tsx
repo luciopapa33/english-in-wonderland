@@ -15,6 +15,9 @@ import {
 import { Button } from '@/components/ui/button'
 import prisma from '@/lib/prisma'
 
+// Force dynamic rendering so Prisma doesn't run at build time
+export const dynamic = 'force-dynamic';
+
 export default async function AdminDashboard() {
     const supabase = await createClient()
 

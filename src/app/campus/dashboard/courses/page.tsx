@@ -16,6 +16,9 @@ import { Button } from '@/components/ui/button'
 import prisma from '@/lib/prisma'
 import { PRODUCT_META, getVideos } from '@/lib/content-helpers'
 
+// Force dynamic rendering so Prisma doesn't run at build time
+export const dynamic = 'force-dynamic';
+
 export default async function CoursesPage() {
     const supabase = await createClient()
 

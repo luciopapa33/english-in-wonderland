@@ -6,6 +6,9 @@ import { cn } from '@/lib/utils';
 import prisma from '@/lib/prisma';
 import { CheckoutButton } from '@/components/checkout-button';
 
+// Force dynamic rendering so Prisma doesn't run at build time
+export const dynamic = 'force-dynamic';
+
 const staticCourses = [
     {
         id: 'general',

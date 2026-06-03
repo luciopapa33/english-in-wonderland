@@ -17,22 +17,12 @@ export default function ContactForm() {
         setStatus('submitting');
         
         const form = e.currentTarget;
-
-        const payload = {
-            nombre: form.nombre.value,
-            apellido: form.apellido.value,
-            email: form.email.value,
-            telefono: form.telefono.value,
-            mensaje: form.mensaje.value
-        };
+        const formData = new FormData(form);
 
         try {
-            const response = await fetch("/api/contact", {
+            const response = await fetch("https://api.web3forms.com/submit", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(payload),
+                body: formData
             });
 
             const data = await response.json();
@@ -42,13 +32,13 @@ export default function ContactForm() {
                 form.reset();
                 setIsHuman(false);
             } else {
-                console.error("Contact API Error:", data);
-                alert("Hubo un error al tratar de enviar el mensaje: " + (data.message || "Error desconocido"));
+                console.error("Web3Forms Error:", data);
+                alert("Error al enviar: " + (data.message || "Intente nuevamente."));
                 setStatus('idle');
             }
         } catch (error) {
             console.error("Submission error:", error);
-            alert("Hubo un error de conexión.");
+            alert("Error de conexión. Verifique su internet e intente nuevamente.");
             setStatus('idle');
         }
     };
@@ -88,6 +78,11 @@ export default function ContactForm() {
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
+                            {/* Web3Forms hidden fields */}
+                            <input type="hidden" name="access_key" value="edc84cd2-040e-4826-9b70-74098359f729" />
+                            <input type="hidden" name="subject" value="Nuevo mensaje desde el sitio web - English in Wonderland" />
+                            <input type="hidden" name="from_name" value="Sitio Web (English in Wonderland)" />
+                            
                             <div className="grid grid-cols-2 gap-4">
                                 <Input 
                                     name="nombre" 

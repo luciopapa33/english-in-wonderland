@@ -5,6 +5,9 @@ import { cn } from '@/lib/utils';
 import prisma from '@/lib/prisma';
 import { Metadata } from 'next';
 
+// Force dynamic rendering so Prisma doesn't run at build time
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
     title: "Tienda | English in Wonderland",
     description: "Cursos de inglés para propósitos específicos: Entrevistas laborales, Viajes y Emergencias Médicas. ¡Dominá el idioma y transformá tu carrera!",
