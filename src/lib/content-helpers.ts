@@ -2,11 +2,13 @@ import { createClient } from '@supabase/supabase-js'
 
 const BUCKET = 'course-content'
 
-// Supabase admin client (service role — server-side only)
 function getStorageClient() {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bktouvieisdzwkdqczrx.supabase.co'
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_mOTPuAWWmyXMqlV8EnPLTQ_BosTwZ59'
+
     return createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        supabaseUrl,
+        supabaseKey,
         { auth: { autoRefreshToken: false, persistSession: false } }
     )
 }
@@ -48,7 +50,7 @@ export const PRODUCT_META: Record<string, {
 // Build the public URL for a file in Supabase Storage
 // ─────────────────────────────────────────────────────────
 function publicUrl(storagePath: string): string {
-    const base = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const base = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bktouvieisdzwkdqczrx.supabase.co'
     return `${base}/storage/v1/object/public/${BUCKET}/${storagePath}`
 }
 
