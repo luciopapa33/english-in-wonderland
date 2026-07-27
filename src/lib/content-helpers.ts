@@ -1,26 +1,13 @@
-import { createClient } from '@supabase/supabase-js'
-
 const BUCKET = 'course-content'
+const SUPABASE_BASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bktouvieisdzwkdqczrx.supabase.co'
 
-function getStorageClient() {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bktouvieisdzwkdqczrx.supabase.co'
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_mOTPuAWWmyXMqlV8EnPLTQ_BosTwZ59'
-
-    return createClient(
-        supabaseUrl,
-        supabaseKey,
-        { auth: { autoRefreshToken: false, persistSession: false } }
-    )
-}
-
-// ─────────────────────────────────────────────────────────
 // Metadata for each digital product slug
-// ─────────────────────────────────────────────────────────
 export const PRODUCT_META: Record<string, {
     gradient: string;
     accent: string;
     accentBg: string;
     contentFolder: string;
+    videoCount: number;
     pdfFile: string | null;
 }> = {
     'english-for-interviews': {
@@ -28,13 +15,15 @@ export const PRODUCT_META: Record<string, {
         accent: 'text-[#BC248C]',
         accentBg: 'bg-[#BC248C]',
         contentFolder: 'interviews',
-        pdfFile: null,
+        videoCount: 29,
+        pdfFile: '4Booklet entrevistas GRABADO.pdf',
     },
     'english-for-travel': {
         gradient: 'from-[#2D93C7] to-[#1DA1D2]',
         accent: 'text-[#2D93C7]',
         accentBg: 'bg-[#2D93C7]',
         contentFolder: 'travel',
+        videoCount: 45,
         pdfFile: '1Booklet para viajes GRABADO.pdf',
     },
     'english-for-medical-emergency': {
@@ -42,7 +31,8 @@ export const PRODUCT_META: Record<string, {
         accent: 'text-[#e74c3c]',
         accentBg: 'bg-[#e74c3c]',
         contentFolder: 'medical',
-        pdfFile: null,
+        videoCount: 12,
+        pdfFile: '3Booklet medical GRABADO.pdf',
     },
 }
 
@@ -50,49 +40,32 @@ export const PRODUCT_META: Record<string, {
 // Build the public URL for a file in Supabase Storage
 // ─────────────────────────────────────────────────────────
 function publicUrl(storagePath: string): string {
-    const base = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bktouvieisdzwkdqczrx.supabase.co'
-    return `${base}/storage/v1/object/public/${BUCKET}/${storagePath}`
+    return `${SUPABASE_BASE_URL}/storage/v1/object/public/${BUCKET}/${encodeURI(storagePath)}`
 }
 
 // ─────────────────────────────────────────────────────────
-// List all .mp4 files in a course folder, sorted numerically
+// List all .mp4 files in a course folder instantly
 // ─────────────────────────────────────────────────────────
 export async function getVideos(folder: string): Promise<{ name: string; number: number; path: string }[]> {
-    const supabase = getStorageClient()
+    const meta = Object.values(PRODUCT_META).find(m => m.contentFolder === folder)
+    const count = meta?.videoCount || 0
 
-    const { data, error } = await supabase.storage
-        .from(BUCKET)
-        .list(folder, { limit: 500, offset: 0 })
-
-    if (error || !data) return []
-
-    return data
-        .filter(f => f.name.endsWith('.mp4'))
-        .map(f => {
-            const num = parseInt(f.name.replace('.mp4', ''), 10)
-            return {
-                name: f.name,
-                number: isNaN(num) ? 0 : num,
-                path: publicUrl(`${folder}/${f.name}`),
-            }
+    const videos = []
+    for (let i = 1; i <= count; i++) {
+        videos.push({
+            name: `${i}.mp4`,
+            number: i,
+            path: publicUrl(`${folder}/${i}.mp4`),
         })
-        .sort((a, b) => a.number - b.number)
+    }
+    return videos
 }
 
 // ─────────────────────────────────────────────────────────
-// Get the PDF file URL from a course folder (if any)
+// Get the PDF file URL from static metadata instantly
 // ─────────────────────────────────────────────────────────
 export async function getPdf(folder: string): Promise<string | null> {
-    const supabase = getStorageClient()
-
-    const { data, error } = await supabase.storage
-        .from(BUCKET)
-        .list(folder, { limit: 500, offset: 0 })
-
-    if (error || !data) return null
-
-    const pdf = data.find(f => f.name.toLowerCase().endsWith('.pdf'))
-    if (!pdf) return null
-
-    return publicUrl(`${folder}/${pdf.name}`)
+    const meta = Object.values(PRODUCT_META).find(m => m.contentFolder === folder)
+    if (!meta || !meta.pdfFile) return null
+    return publicUrl(`${folder}/${meta.pdfFile}`)
 }

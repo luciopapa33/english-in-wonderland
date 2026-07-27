@@ -26,11 +26,11 @@ export default async function DashboardPage() {
         data: { user },
     } = await supabase.auth.getUser()
 
-    if (!user) {
+    if (!user || !user.email) {
         redirect('/campus')
     }
 
-    const dbUser = await prisma.user.findUnique({
+    let dbUser = await prisma.user.findUnique({
         where: { email: user.email },
         include: {
             enrollments: {
@@ -42,6 +42,25 @@ export default async function DashboardPage() {
             completions: true,
         }
     })
+
+    if (!dbUser) {
+        try {
+            dbUser = await prisma.user.create({
+                data: {
+                    email: user.email,
+                    name: user.user_metadata?.name || user.email.split('@')[0],
+                    role: user.email === 'admin@englishinwonderland.com' ? 'ADMIN' : 'STUDENT',
+                },
+                include: {
+                    enrollments: { include: { course: true } },
+                    subscriptions: true,
+                    completions: true,
+                }
+            })
+        } catch (e) {
+            console.error('Error auto-creating user in Prisma:', e)
+        }
+    }
 
     // Calculate real stats
     const totalEnrollments = dbUser?.enrollments.length || 0

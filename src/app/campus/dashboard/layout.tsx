@@ -25,7 +25,7 @@ export default async function DashboardLayout({
         data: { user },
     } = await supabase.auth.getUser()
 
-    if (!user) {
+    if (!user || !user.email) {
         redirect('/campus')
     }
 
