@@ -90,8 +90,8 @@ export default async function CampusCoursePage({
             redirect('/campus/dashboard/courses')
         }
 
-        const videos = getVideos(meta.contentFolder)
-        const pdfPath = getPdf(meta.contentFolder)
+        const videos = await getVideos(meta.contentFolder)
+        const pdfPath = await getPdf(meta.contentFolder)
         const totalVideos = videos.length
         const completedCount = completions.length
         const progressPercent = totalVideos > 0 ? Math.round((completedCount / totalVideos) * 100) : 0

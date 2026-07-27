@@ -42,18 +42,39 @@ export default async function CoursesPage() {
         }
     })
 
+    // ADMIN: always has access to ALL courses
+    const isAdmin = dbUser?.role === 'ADMIN'
+    let enrollments = dbUser?.enrollments ?? []
+
+    if (isAdmin) {
+        const allCourses = await prisma.course.findMany()
+        // Build synthetic enrollment objects so the rest of the page works unchanged
+        const enrolledCourseIds = new Set(enrollments.map(e => e.courseId))
+        const syntheticEnrollments = allCourses
+            .filter(c => !enrolledCourseIds.has(c.id))
+            .map(c => ({
+                id: `admin-${c.id}`,
+                userId: dbUser!.id,
+                courseId: c.id,
+                course: c,
+                createdAt: new Date(),
+                progress: 0,
+            }))
+        enrollments = [...enrollments, ...syntheticEnrollments]
+    }
+
     // Calculate progress per course
     const courseProgressMap: Record<string, { total: number; completed: number; percent: number }> = {}
 
     if (dbUser) {
-        for (const enrollment of dbUser.enrollments) {
+        for (const enrollment of enrollments) {
             const course = enrollment.course
             let totalItems = 0
 
             if (course.type === 'DIGITAL_PRODUCT' && course.slug) {
                 const meta = PRODUCT_META[course.slug]
                 if (meta) {
-                    const videos = getVideos(meta.contentFolder)
+                    const videos = await getVideos(meta.contentFolder)
                     totalItems = videos.length
                 }
             } else {
@@ -99,7 +120,7 @@ export default async function CoursesPage() {
             </div>
 
             {/* Course Grid */}
-            {dbUser?.enrollments.length === 0 ? (
+            {enrollments.length === 0 ? (
                 <div className="bg-white rounded-[3rem] p-16 text-center border-2 border-dashed border-slate-200">
                     <div className="h-20 w-20 bg-slate-50 rounded-3xl flex items-center justify-center mx-auto mb-6 text-slate-300">
                         <BookOpen size={40} />
@@ -114,7 +135,7 @@ export default async function CoursesPage() {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                    {dbUser?.enrollments.map((enrollment) => {
+                    {enrollments.map((enrollment) => {
                         const progress = courseProgressMap[enrollment.course.id]
                         const isCompleted = progress && progress.percent >= 100
                         const gradients = [

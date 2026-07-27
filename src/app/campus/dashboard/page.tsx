@@ -59,7 +59,7 @@ export default async function DashboardPage() {
             if (course.type === 'DIGITAL_PRODUCT' && course.slug) {
                 const meta = PRODUCT_META[course.slug]
                 if (meta) {
-                    const videos = getVideos(meta.contentFolder)
+                    const videos = await getVideos(meta.contentFolder)
                     totalItems = videos.length
                 }
             } else {

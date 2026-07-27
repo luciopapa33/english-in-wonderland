@@ -86,6 +86,7 @@ model Enrollment {
   user      User     @relation(fields: [userId], references: [id])
   course    Course   @relation(fields: [courseId], references: [id])
   createdAt DateTime @default(now())
+  progress  Int      @default(0)
 
   @@unique([userId, courseId])
 }
@@ -116,4 +117,5 @@ enum Role {
   STUDENT
   ADMIN
   TRANSLATOR
+  TEACHER
 }
