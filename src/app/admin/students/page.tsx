@@ -1,83 +1,49 @@
-'use client'
-
-import { useEffect, useState, useTransition } from 'react'
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import {
-    Users,
-    BookOpen,
-    BarChart3,
-    TrendingUp,
-    ArrowUpRight,
-    Search,
-    CheckCircle2,
-    XCircle,
-    GraduationCap,
-    Mail,
-    ChevronDown,
-    ChevronUp,
-    Loader2
-} from 'lucide-react'
+import { Users, BookOpen, BarChart3, TrendingUp, ArrowUpRight, Search, CheckCircle2, XCircle, Mail } from 'lucide-react'
+import prisma from '@/lib/prisma'
 import { grantCourseAccess, revokeAccess } from '../actions'
 
-type Course = { id: string; title: string; level: string; type: string }
-type Enrollment = { courseId: string; course: Course }
-type Student = {
-    id: string
-    name: string | null
-    email: string
-    createdAt: string
-    enrollments: Enrollment[]
-}
+export const dynamic = 'force-dynamic'
 
-// ─── Server-data loader component (we'll call a JSON endpoint) ───────────────
-// Since we need interactivity (grant/revoke without full page reload) we make
-// this a Client Component that fetches data from a lightweight API route.
+export default async function AdminStudentsPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ q?: string; open?: string }>
+}) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
-export default function AdminStudentsPage() {
-    const [students, setStudents] = useState<Student[]>([])
-    const [courses, setCourses] = useState<Course[]>([])
-    const [loading, setLoading] = useState(true)
-    const [search, setSearch] = useState('')
-    const [expanded, setExpanded] = useState<string | null>(null)
-    const [isPending, startTransition] = useTransition()
-    const [actionState, setActionState] = useState<Record<string, 'granting' | 'revoking' | null>>({})
+    if (!user) redirect('/campus')
 
-    const fetchData = async () => {
-        setLoading(true)
-        const res = await fetch('/api/admin/students-data', { cache: 'no-store' })
-        if (res.ok) {
-            const json = await res.json()
-            setStudents(json.students)
-            setCourses(json.courses)
-        }
-        setLoading(false)
-    }
+    const dbUser = await prisma.user.findUnique({
+        where: { email: user.email },
+        select: { role: true }
+    })
 
-    useEffect(() => { fetchData() }, [])
+    if (dbUser?.role !== 'ADMIN') redirect('/campus/dashboard')
 
-    const filtered = students.filter(s =>
-        s.name?.toLowerCase().includes(search.toLowerCase()) ||
-        s.email.toLowerCase().includes(search.toLowerCase())
-    )
+    const params = await searchParams
+    const search = params.q || ''
+    const openId = params.open || ''
 
-    const isEnrolled = (student: Student, courseId: string) =>
-        student.enrollments.some(e => e.courseId === courseId)
-
-    const handleGrant = async (student: Student, courseId: string) => {
-        const key = `${student.id}-${courseId}`
-        setActionState(prev => ({ ...prev, [key]: 'granting' }))
-        await grantCourseAccess(student.id, courseId)
-        await fetchData()
-        setActionState(prev => ({ ...prev, [key]: null }))
-    }
-
-    const handleRevoke = async (student: Student, courseId: string) => {
-        const key = `${student.id}-${courseId}`
-        setActionState(prev => ({ ...prev, [key]: 'revoking' }))
-        await revokeAccess(student.id, courseId)
-        await fetchData()
-        setActionState(prev => ({ ...prev, [key]: null }))
-    }
+    const [students, courses] = await Promise.all([
+        prisma.user.findMany({
+            where: search ? {
+                OR: [
+                    { name: { contains: search, mode: 'insensitive' } },
+                    { email: { contains: search, mode: 'insensitive' } },
+                ]
+            } : {},
+            orderBy: { createdAt: 'desc' },
+            include: { enrollments: { select: { courseId: true } } }
+        }),
+        prisma.course.findMany({
+            orderBy: { title: 'asc' },
+            select: { id: true, title: true, level: true, type: true }
+        })
+    ])
 
     return (
         <div className="min-h-screen bg-slate-50 flex">
@@ -110,56 +76,55 @@ export default function AdminStudentsPage() {
             </aside>
 
             {/* Main */}
-            <main className="flex-1 p-12 max-w-7xl mx-auto">
-                <header className="flex items-center justify-between mb-10">
+            <main className="flex-1 p-10 max-w-6xl">
+                <header className="flex items-center justify-between mb-8">
                     <div>
                         <h1 className="text-4xl font-black text-slate-900 tracking-tighter">Gestión de Alumnos</h1>
-                        <p className="text-slate-500 font-medium mt-1">Otorgá acceso gratuito a los cursos disponibles.</p>
-                    </div>
-                    <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-500">
-                        <GraduationCap size={18} className="text-[var(--edu-primary)]" />
-                        {loading ? '...' : `${students.length} alumnos registrados`}
+                        <p className="text-slate-500 font-medium mt-1">
+                            {students.length} alumnos registrados · {courses.length} cursos disponibles
+                        </p>
                     </div>
                 </header>
 
-                {/* Search */}
-                <div className="relative mb-8">
+                {/* Search form */}
+                <form method="GET" action="/admin/students" className="relative mb-8">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                     <input
                         type="text"
+                        name="q"
+                        defaultValue={search}
                         placeholder="Buscar alumno por nombre o email..."
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[var(--edu-primary)] transition-all font-medium"
+                        className="w-full pl-12 pr-32 py-4 rounded-2xl bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[var(--edu-primary)] font-medium transition-all"
                     />
-                </div>
+                    <button
+                        type="submit"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 px-5 py-2 bg-slate-900 text-white text-xs font-black rounded-xl hover:bg-[var(--edu-primary)] transition-colors"
+                    >
+                        Buscar
+                    </button>
+                </form>
 
-                {/* Students list */}
-                {loading ? (
-                    <div className="flex items-center justify-center py-24 text-slate-400">
-                        <Loader2 className="animate-spin mr-3" size={24} /> Cargando alumnos...
-                    </div>
-                ) : filtered.length === 0 ? (
-                    <div className="bg-white rounded-[3rem] p-20 text-center border border-slate-100 shadow-xl shadow-slate-200/50">
-                        <Users size={48} className="mx-auto mb-4 text-slate-200" />
-                        <h2 className="text-xl font-black text-slate-900 mb-2">No se encontraron alumnos</h2>
-                        <p className="text-slate-400 font-medium">Probá buscando con otro término.</p>
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        {filtered.map(student => {
-                            const isOpen = expanded === student.id
-                            const enrolledCount = student.enrollments.length
+                {/* Students */}
+                <div className="space-y-4">
+                    {students.length === 0 ? (
+                        <div className="bg-white rounded-[3rem] p-20 text-center border border-slate-100 shadow-xl">
+                            <Users size={48} className="mx-auto mb-4 text-slate-200" />
+                            <h2 className="text-xl font-black text-slate-900 mb-2">No se encontraron alumnos</h2>
+                            {search && (
+                                <Link href="/admin/students" className="text-[var(--edu-primary)] font-bold text-sm">
+                                    Limpiar búsqueda
+                                </Link>
+                            )}
+                        </div>
+                    ) : (
+                        students.map(student => {
+                            const enrolledIds = new Set(student.enrollments.map(e => e.courseId))
+                            const isOpen = openId === student.id
+
                             return (
-                                <div
-                                    key={student.id}
-                                    className="bg-white rounded-3xl border border-slate-100 shadow-lg shadow-slate-200/40 overflow-hidden transition-all"
-                                >
-                                    {/* Student row */}
-                                    <button
-                                        onClick={() => setExpanded(isOpen ? null : student.id)}
-                                        className="w-full flex items-center gap-4 px-8 py-5 text-left hover:bg-slate-50 transition-colors"
-                                    >
+                                <div key={student.id} className="bg-white rounded-3xl border border-slate-100 shadow-lg overflow-hidden">
+                                    {/* Student header row */}
+                                    <div className="flex items-center gap-4 px-6 py-5">
                                         {/* Avatar */}
                                         <div className="h-11 w-11 rounded-xl bg-slate-900 flex items-center justify-center text-white text-sm font-black flex-shrink-0">
                                             {(student.name?.[0] || student.email[0]).toUpperCase()}
@@ -173,77 +138,80 @@ export default function AdminStudentsPage() {
                                             </div>
                                         </div>
 
-                                        {/* Badges */}
-                                        <div className="flex items-center gap-3">
-                                            <span className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest border border-indigo-100">
-                                                {enrolledCount} {enrolledCount === 1 ? 'curso' : 'cursos'}
+                                        {/* Stats + expand toggle */}
+                                        <div className="flex items-center gap-3 flex-shrink-0">
+                                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${enrolledIds.size > 0 ? 'bg-green-50 text-green-600 border-green-200' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+                                                {enrolledIds.size} {enrolledIds.size === 1 ? 'curso' : 'cursos'}
                                             </span>
                                             <span className="text-[10px] font-bold text-slate-400">
                                                 {new Date(student.createdAt).toLocaleDateString('es-AR')}
                                             </span>
-                                            {isOpen
-                                                ? <ChevronUp size={16} className="text-slate-400" />
-                                                : <ChevronDown size={16} className="text-slate-400" />
-                                            }
-                                        </div>
-                                    </button>
 
-                                    {/* Expanded: course access panel */}
+                                            {/* Toggle button — uses URL param to expand/collapse */}
+                                            <Link
+                                                href={isOpen
+                                                    ? `/admin/students${search ? `?q=${search}` : ''}`
+                                                    : `/admin/students?${search ? `q=${search}&` : ''}open=${student.id}`
+                                                }
+                                                className="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-900 hover:text-white text-[11px] font-black transition-all"
+                                            >
+                                                {isOpen ? 'Cerrar ↑' : 'Ver cursos ↓'}
+                                            </Link>
+                                        </div>
+                                    </div>
+
+                                    {/* Expanded course access panel */}
                                     {isOpen && (
-                                        <div className="border-t border-slate-100 px-8 py-6">
+                                        <div className="border-t border-slate-100 bg-slate-50/60 px-6 py-5">
                                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">
-                                                Acceso a cursos — otorgá o revocá acceso gratuito
+                                                Cursos disponibles — otorgá o revocá acceso gratuito
                                             </p>
                                             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                                 {courses.map(course => {
-                                                    const enrolled = isEnrolled(student, course.id)
-                                                    const key = `${student.id}-${course.id}`
-                                                    const busy = actionState[key]
-
+                                                    const enrolled = enrolledIds.has(course.id)
                                                     return (
                                                         <div
                                                             key={course.id}
-                                                            className={`flex items-center justify-between gap-3 p-4 rounded-2xl border transition-all ${enrolled
-                                                                ? 'bg-green-50 border-green-200'
-                                                                : 'bg-slate-50 border-slate-200'
-                                                                }`}
+                                                            className={`flex items-center justify-between gap-3 p-4 rounded-2xl border transition-all ${enrolled ? 'bg-green-50 border-green-200' : 'bg-white border-slate-200'}`}
                                                         >
-                                                            <div className="flex items-center gap-3 min-w-0">
-                                                                <div className={`h-8 w-8 rounded-xl flex items-center justify-center text-white text-[10px] font-black flex-shrink-0 ${enrolled ? 'bg-green-500' : 'bg-slate-400'}`}>
+                                                            {/* Course info */}
+                                                            <div className="flex items-center gap-2.5 min-w-0">
+                                                                <div className={`h-9 w-9 rounded-xl flex items-center justify-center text-white text-xs font-black flex-shrink-0 ${enrolled ? 'bg-green-500' : 'bg-slate-400'}`}>
                                                                     {course.title[0]}
                                                                 </div>
                                                                 <div className="min-w-0">
-                                                                    <div className="text-xs font-black text-slate-900 truncate">{course.title}</div>
+                                                                    <div className="text-xs font-black text-slate-900 truncate leading-tight">{course.title}</div>
                                                                     <div className="text-[10px] font-bold text-slate-400 uppercase">{course.level}</div>
                                                                 </div>
                                                             </div>
 
+                                                            {/* Action form */}
                                                             {enrolled ? (
-                                                                <button
-                                                                    onClick={() => handleRevoke(student, course.id)}
-                                                                    disabled={!!busy}
-                                                                    title="Revocar acceso"
-                                                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white text-[10px] font-black transition-all border border-red-200 flex-shrink-0 disabled:opacity-50"
-                                                                >
-                                                                    {busy === 'revoking'
-                                                                        ? <Loader2 size={12} className="animate-spin" />
-                                                                        : <XCircle size={12} />
-                                                                    }
-                                                                    Revocar
-                                                                </button>
+                                                                <form action={async () => {
+                                                                    'use server'
+                                                                    await revokeAccess(student.id, course.id)
+                                                                    redirect(`/admin/students?${search ? `q=${search}&` : ''}open=${student.id}`)
+                                                                }}>
+                                                                    <button
+                                                                        type="submit"
+                                                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white text-red-500 hover:bg-red-500 hover:text-white text-[10px] font-black transition-all border border-red-200 flex-shrink-0 cursor-pointer"
+                                                                    >
+                                                                        <XCircle size={12} /> Quitar
+                                                                    </button>
+                                                                </form>
                                                             ) : (
-                                                                <button
-                                                                    onClick={() => handleGrant(student, course.id)}
-                                                                    disabled={!!busy}
-                                                                    title="Dar acceso gratuito"
-                                                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--edu-primary)] text-white hover:opacity-90 text-[10px] font-black transition-all flex-shrink-0 disabled:opacity-50"
-                                                                >
-                                                                    {busy === 'granting'
-                                                                        ? <Loader2 size={12} className="animate-spin" />
-                                                                        : <CheckCircle2 size={12} />
-                                                                    }
-                                                                    Dar acceso
-                                                                </button>
+                                                                <form action={async () => {
+                                                                    'use server'
+                                                                    await grantCourseAccess(student.id, course.id)
+                                                                    redirect(`/admin/students?${search ? `q=${search}&` : ''}open=${student.id}`)
+                                                                }}>
+                                                                    <button
+                                                                        type="submit"
+                                                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--edu-primary)] text-white hover:opacity-90 text-[10px] font-black transition-all flex-shrink-0 cursor-pointer shadow-md shadow-[var(--edu-primary)]/30"
+                                                                    >
+                                                                        <CheckCircle2 size={12} /> Dar acceso
+                                                                    </button>
+                                                                </form>
                                                             )}
                                                         </div>
                                                     )
@@ -253,9 +221,9 @@ export default function AdminStudentsPage() {
                                     )}
                                 </div>
                             )
-                        })}
-                    </div>
-                )}
+                        })
+                    )}
+                </div>
             </main>
         </div>
     )
