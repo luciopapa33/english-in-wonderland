@@ -14,6 +14,8 @@ import {
 import { Button } from '@/components/ui/button'
 import prisma from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardLayout({
     children,
 }: {
@@ -30,10 +32,15 @@ export default async function DashboardLayout({
     }
 
     // Fetch only what's needed for the layout/header
-    const dbUser = await prisma.user.findUnique({
-        where: { email: user.email },
-        select: { name: true, role: true }
-    })
+    let dbUser: { name: string | null; role: string } | null = null
+    try {
+        dbUser = await prisma.user.findUnique({
+            where: { email: user.email },
+            select: { name: true, role: true }
+        })
+    } catch (e) {
+        console.error('Error fetching user from DB in layout:', e)
+    }
 
     const navItems = [
         { icon: LayoutDashboard, label: 'Resumen', href: '/campus/dashboard', active: true },
