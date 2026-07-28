@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button'
 import prisma from '@/lib/prisma'
 import { PRODUCT_META, getVideos } from '@/lib/content-helpers'
+import AdminAccessPanel from '@/components/admin/AdminAccessPanel'
 
 // Force dynamic rendering so Prisma doesn't run at build time
 export const dynamic = 'force-dynamic';
@@ -120,6 +121,7 @@ export default async function DashboardPage() {
                 </div>
 
                 <div className="flex items-center gap-4">
+                    {dbUser?.role === 'ADMIN' && <AdminAccessPanel />}
                     <div className="bg-white p-2.5 rounded-[1.25rem] border border-slate-200 flex items-center gap-3 pr-5 shadow-sm">
                         <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#BC248C] to-[#2D93C7] flex items-center justify-center text-white font-extrabold shadow-lg shadow-magenta-500/20">
                             {dbUser?.name?.[0] || 'U'}
