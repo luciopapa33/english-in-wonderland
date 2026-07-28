@@ -94,3 +94,27 @@ export async function deleteCourse(courseId: string) {
     revalidatePath('/admin/courses')
     redirect('/admin/courses')
 }
+
+export async function grantCourseAccess(userId: string, courseId: string) {
+    await checkAdmin()
+
+    await prisma.enrollment.upsert({
+        where: { userId_courseId: { userId, courseId } },
+        update: {},
+        create: { userId, courseId },
+    })
+
+    revalidatePath('/admin/students')
+    revalidatePath('/campus/dashboard')
+}
+
+export async function revokeAccess(userId: string, courseId: string) {
+    await checkAdmin()
+
+    await prisma.enrollment.deleteMany({
+        where: { userId, courseId },
+    })
+
+    revalidatePath('/admin/students')
+    revalidatePath('/campus/dashboard')
+}
