@@ -54,6 +54,76 @@ export default function TranslationsPage() {
                             </Button>
                         </div>
                     </div>
+
+                    {/* RIGHT SIDE — Main Fields of Expertise */}
+                    <div className="hidden lg:flex flex-col gap-3">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] mb-1">
+                            Main Fields of Expertise
+                        </p>
+                        {[
+                            {
+                                label: 'Education',
+                                sub: 'Academic & university documents',
+                                icon: GraduationCap,
+                                color: 'from-violet-500 to-purple-600',
+                                glow: 'shadow-purple-500/25',
+                                bg: 'bg-violet-500/10',
+                                text: 'text-violet-300',
+                            },
+                            {
+                                label: 'Healthcare',
+                                sub: 'Medical records & clinical docs',
+                                icon: Stethoscope,
+                                color: 'from-rose-500 to-pink-600',
+                                glow: 'shadow-rose-500/25',
+                                bg: 'bg-rose-500/10',
+                                text: 'text-rose-300',
+                            },
+                            {
+                                label: 'Legal',
+                                sub: 'Contracts, courts & compliance',
+                                icon: Scale,
+                                color: 'from-amber-500 to-orange-500',
+                                glow: 'shadow-amber-500/25',
+                                bg: 'bg-amber-500/10',
+                                text: 'text-amber-300',
+                            },
+                            {
+                                label: 'Technology',
+                                sub: 'Software, UX & tech content',
+                                icon: Zap,
+                                color: 'from-cyan-500 to-[#2D93C7]',
+                                glow: 'shadow-cyan-500/25',
+                                bg: 'bg-cyan-500/10',
+                                text: 'text-cyan-300',
+                            },
+                            {
+                                label: 'Immigration',
+                                sub: 'USCIS, visas & civil records',
+                                icon: Globe,
+                                color: 'from-emerald-500 to-teal-500',
+                                glow: 'shadow-emerald-500/25',
+                                bg: 'bg-emerald-500/10',
+                                text: 'text-emerald-300',
+                            },
+                        ].map((field, i) => (
+                            <div
+                                key={i}
+                                className={`group flex items-center gap-4 p-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl ${field.glow}`}
+                            >
+                                <div className={`h-11 w-11 rounded-xl bg-gradient-to-br ${field.color} flex items-center justify-center text-white shadow-lg ${field.glow} flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
+                                    <field.icon size={20} />
+                                </div>
+                                <div className="min-w-0">
+                                    <div className="font-black text-white text-sm leading-tight">{field.label}</div>
+                                    <div className={`text-[11px] font-medium ${field.text} leading-tight mt-0.5`}>{field.sub}</div>
+                                </div>
+                                <div className="ml-auto">
+                                    <div className={`h-1.5 w-1.5 rounded-full bg-gradient-to-br ${field.color} opacity-60 group-hover:opacity-100 transition-opacity`} />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </section>
 
